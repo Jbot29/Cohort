@@ -9,8 +9,9 @@
 (mg/set-db! (mg/get-db "monger-test"))
 
 (defn read-template [template-name]
-  (slurp (clojure.java.io/resource
-    (str "templates/" template-name ".mustache"))))
+  (slurp
+      (str "resources/public/templates/" template-name ".mustache")))
+
 
 (defn render-template [template-file params]
   (clostache/render (read-template template-file) params))
