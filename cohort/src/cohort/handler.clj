@@ -2,9 +2,9 @@
   (:use compojure.core)
   (:require [compojure.handler :as handler]
             [compojure.route :as route]
-	    [monger.core :as mg]
-	    [clostache.parser :as clostache]
-	    [ring.util.response :as response]))
+            [monger.core :as mg]
+            [clostache.parser :as clostache]
+            [ring.util.response :as response]))
 
 (mg/connect!)
 (mg/set-db! (mg/get-db "monger-test"))
