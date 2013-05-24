@@ -4,10 +4,8 @@
             [compojure.route :as route]
             [monger.core :as mg]
             [clostache.parser :as clostache]
-            [ring.util.response :as response]))
-
-(mg/connect!)
-(mg/set-db! (mg/get-db "monger-test"))
+            [ring.util.response :as response]
+	    [cohort.reports :as reports]))
 
 (defn read-template [template-name]
   (slurp
@@ -20,17 +18,27 @@
 (defn index []
   (render-template "index" {}))
 
+(defn cohort-name
+      [x]
+      (let [v (clojure.string/split (str x) #"\s")]
+      	   (str (nth v 1) (nth v 2))))
+
+(defn cohort-date
+      [date]
+      (.format (java.text.SimpleDateFormat. "MM/dd/yy") date))
+
+(defn all-dates
+      [cohorts]
+      (list (set(for [[cohort workouts] cohorts
+           [workout-date workout-count] workouts]
+           (cohort-date workout-date)))))
 
 (defn build-report-data
-      []
-      (list 
-      	    (list "Group1" "37" "05/23/12")
-	    (list "Group2" "0" "05/23/12")
-	    (list "Group3" "0" "05/23/12")
-            (list "Group1" "22" "05/24/12")
-            (list "Group2" "10" "05/24/12")
-            (list "Group3" "0" "05/24/12")
-))
+      [challenge_id]
+      (let [cohorts (reports/daily-workout-cohorts challenge_id)]
+      	   (for [[cohort workouts] cohorts
+	   	[workout-date workout-count] workouts]
+	   	(list (cohort-name cohort) workout-count (cohort-date workout-date)))))
 
 (defn build-report
       [report-data]
@@ -44,7 +52,7 @@
 (defn gen-report 
       [params]
       (println (:cha_id params))
-      (write-report (build-report (build-report-data)))
+      (write-report (build-report (build-report-data (:cha_id params))))
       (response/redirect "/"))
 
 (defn gen-report-page

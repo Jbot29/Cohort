@@ -21,7 +21,6 @@
       (init-daily-value map day workouts user-joined))))
 
 (defn daily-workout-real [challenge-id cursor accum]
-  (println accum)
   (if (.hasNext cursor)
     (recur challenge-id cursor (add-daily accum (.next cursor) challenge-id))
     accum))
