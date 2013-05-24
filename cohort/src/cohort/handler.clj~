@@ -17,10 +17,37 @@
   (clostache/render (read-template template-file) params))
 
 (defn index []
-  (render-template "index" {:greeting "Bonjour"}))
+  (render-template "index" {}))
+
+
+(defn build-report-data
+      []
+      (list 
+      	    (list "Group1" "37" "05/23/12")
+	    (list "Group2" "0" "05/23/12")
+	    (list "Group3" "0" "05/23/12")
+            (list "Group1" "22" "05/24/12")
+            (list "Group2" "10" "05/24/12")
+            (list "Group3" "0" "05/24/12")
+))
+
+(defn build-report
+      [report-data]
+      (str "key,value,date\n" (clojure.string/join "\n" (map (fn [x] (clojure.string/join "," x)) report-data))))
+
+(defn write-report
+      [report]
+      (with-open [wrtr (clojure.java.io/writer "resources/public/data.csv")]
+        (.write wrtr report)))
+
+(defn gen-report 
+      []
+      (write-report (build-report (build-report-data)))
+      (render-template "gen-report" {}))
 
 (defroutes app-routes
   (GET "/" [] (index))
+  (GET "/report" [] (gen-report))
   (route/resources "/")
   (route/not-found "Not Found"))
 

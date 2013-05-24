@@ -3,7 +3,8 @@
   (:require [compojure.handler :as handler]
             [compojure.route :as route]
 	    [monger.core :as mg]
-	    [clostache.parser :as clostache]))
+	    [clostache.parser :as clostache]
+	    [ring.util.response :as response]))
 
 (mg/connect!)
 (mg/set-db! (mg/get-db "monger-test"))
@@ -41,13 +42,19 @@
         (.write wrtr report)))
 
 (defn gen-report 
-      []
+      [params]
+      (println (:cha_id params))
       (write-report (build-report (build-report-data)))
+      (response/redirect "/"))
+
+(defn gen-report-page
+      []
       (render-template "gen-report" {}))
 
 (defroutes app-routes
   (GET "/" [] (index))
-  (GET "/report" [] (gen-report))
+  (GET "/report" [] (gen-report-page))
+  (POST "/report" {params :params} (gen-report params))
   (route/resources "/")
   (route/not-found "Not Found"))
 
