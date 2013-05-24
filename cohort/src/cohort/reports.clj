@@ -2,8 +2,11 @@
   (:use cohort.mongo))
 
 (defn add-daily-value [map day workouts joined]
-  (let [new-value (+ (get (get map joined) day) workouts)]
-    (assoc (get map joined) day new-value)))
+  (let [cohort-map (get map joined)]
+    (if (contains? cohort-map day)
+      (let [new-value (+ (get (get map joined) day) workouts)]
+        (assoc map joined (assoc cohort-map day new-value)))
+      (assoc map joined (assoc cohort-map day workouts)))))
 
 (defn init-daily-value [map day workouts joined]
   (assoc map joined (sorted-map day workouts)))
@@ -17,7 +20,11 @@
       (add-daily-value map day workouts user-joined)
       (init-daily-value map day workouts user-joined))))
 
+(defn daily-workout-real [challenge-id cursor accum]
+  (println accum)
+  (if (.hasNext cursor)
+    (recur challenge-id cursor (add-daily accum (.next cursor) challenge-id))
+    accum))
+
 (defn daily-workout-cohorts [challenge-id]
-  (let [result (atom (sorted-map))]
-    (each-daily-score challenge-id (fn [score] (reset! result (add-daily @result score challenge-id))))
-    result))
+  (daily-workout-real challenge-id (daily-score-cursor challenge-id) (sorted-map)))
