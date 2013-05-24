@@ -9,9 +9,9 @@
 (defn score-collection [challenge-id score-name]
   (str "challenge_" challenge-id "_" score-name "_scores"))
 
-(defn daily-score-cursor [challenge-id]
+(defn daily-score-cursor [challenge-id score-name]
   (binding [monger.core/*mongodb-database* (monger.core/get-db "score")]
-    (monger.collection/find (score-collection challenge-id "daily_refuel"))))
+    (monger.collection/find (score-collection challenge-id score-name))))
 
 (defn joined [user-id challenge-id]
   (binding [monger.core/*mongodb-database* (monger.core/get-db "score")]
