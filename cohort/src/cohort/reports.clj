@@ -6,7 +6,8 @@
   (let [^com.mongodb.DBCursor scores (score-cursor challenge-id score-name)
         score-fn (fn [^com.mongodb.DBObject score] (for [key score-keys] (.get score key)))
         map-fn (fn [^com.mongodb.DBObject score] { (joined (.get score "i") challenge-id) { (.get score "d") (score-fn score) } })
-        cohort-map (apply merge-with (concat [(partial merge-with (partial map +))] (map map-fn scores)))
+        add-fn (fn [a b] (doall (map + a b)))
+        cohort-map (apply merge-with (concat [(partial merge-with add-fn)] (map map-fn scores)))
         all-dates (set (mapcat keys (vals cohort-map)))
         zeroes (for [key score-keys] 0)
         sort-fn (fn [x y] (let [c (compare (first x) (first y))] (if (= c 0) (compare (second x) (second y)) c)))]
