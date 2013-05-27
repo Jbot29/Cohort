@@ -35,10 +35,14 @@
 
 (defn build-report-data
       [challenge_id]
-      (let [cohorts (reports/daily-workout-cohorts challenge_id)]
-      	   (for [[cohort workouts] cohorts
-	   	[workout-date workout-count] workouts]
-	   	(list (cohort-name cohort) workout-count (cohort-date workout-date)))))
+      (let [cohorts (reports/joined-cohorts "658" "daily_cdphp" ["s1"])]
+      	   (for [[cohort date workout] cohorts]
+	   	(list (cohort-name cohort) (first workout) (cohort-date date)))))
+
+;;      (let [cohorts (reports/joined-cohorts "658" "daily_cdphp" ["s1"])]
+;;      	   (for [[cohort workouts] cohorts
+;;	   	[workout-date workout-count] workouts]
+;;	   	(list cohort workout-count workout-date))))
 
 (defn build-report
       [report-data]

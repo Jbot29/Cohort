@@ -7,9 +7,6 @@
             [ring.util.response :as response]
 	    [cohort.reports :as reports]))
 
-(mg/connect!)
-(mg/set-db! (mg/get-db "monger-test"))
-
 (defn read-template [template-name]
   (slurp
       (str "resources/public/templates/" template-name ".mustache")))
@@ -21,19 +18,27 @@
 (defn index []
   (render-template "index" {}))
 
+(defn cohort-name
+      [x]
+      (let [v (clojure.string/split (str x) #"\s")]
+      	   (str (nth v 1) (nth v 2))))
+
+(defn cohort-date
+      [date]
+      (.format (java.text.SimpleDateFormat. "MM/dd/yy") date))
+
+(defn all-dates
+      [cohorts]
+      (list (set(for [[cohort workouts] cohorts
+           [workout-date workout-count] workouts]
+           (cohort-date workout-date)))))
 
 (defn build-report-data
       [challenge_id]
-      (println challenge_id)
-      (println (reports/daily-workout-cohorts "658"))
-      (list 
-      	    (list "Group1" "37" "05/23/12")
-	    (list "Group2" "0" "05/23/12")
-	    (list "Group3" "0" "05/23/12")
-            (list "Group1" "22" "05/24/12")
-            (list "Group2" "10" "05/24/12")
-            (list "Group3" "0" "05/24/12")
-))
+      (let [cohorts (reports/joined-cohorts "658" "daily_cdphp" ["s1"])]
+      	   (for [[cohort workouts] cohorts
+	   	[workout-date workout-count] workouts]
+	   	(list (cohort-name cohort) workout-count (cohort-date workout-date)))))
 
 (defn build-report
       [report-data]
